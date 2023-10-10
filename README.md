@@ -43,6 +43,11 @@ Antes de usar este código, certifique-se de ter os seguintes pré-requisitos:
 
    ```bash
     pip install mmcv opencv-python
+    pip install openmim
+    mim install mmengine
+    pip install mmcv-full==1.3.17 -f https://download.openmmlab.com/mmcv/dist/cpu/torch1.8.0/index.html
+    pip install fairscale
+    pip install timm
 
 Coloque o código fornecido no diretório MMDetection/demo ou crie um novo arquivo Python com o código.
 
