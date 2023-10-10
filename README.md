@@ -1,6 +1,6 @@
 # VOXAR_temp
-
-# MMDetection Video Demo Doc
+# pode se verifica as libs e os resultados no google colab do projeto VOXAR_lab_alt.ipynb.
+#  Video Demo Doc
 
 Este README fornece documentação e instruções para usar o código de demonstração de vídeo do MMDetection. O código é projetado para detecção de objetos em vídeos usando modelos pré-treinados do MMDetection, uma popular caixa de ferramentas de detecção de objetos.
 
