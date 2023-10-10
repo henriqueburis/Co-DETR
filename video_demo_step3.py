@@ -98,7 +98,7 @@ def main():
         # Adiciona o número de detecções de carros ao contador
         count_car += len(result)
 
-        res = model_sam(frame, bboxes=bbox_list.numpy())
+        res = model_sam(frame, bboxes=bboxes.numpy())
 
         # Obtém as máscaras de segmentação a partir do resultado SAM na documentação do modelo tem todas as keys.
         masks = res['segmentation']
