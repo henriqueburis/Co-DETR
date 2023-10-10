@@ -4,6 +4,7 @@ import argparse
 import cv2
 import mmcv
 import torch
+import numpy as np
 
 from mmdet.apis import inference_detector, init_detector
 #from projects import *
@@ -57,7 +58,22 @@ def main():
     for frame in mmcv.track_iter_progress(video_reader):
         result = inference_detector(model, frame)
         # Filtrar apenas as detecções do objeto desejado (carro)
-        result = [detection for detection in result[0] if detection[4] == chosen_class_id]
+        if isinstance(result, tuple):
+            bbox_result, segm_result = result
+            print(bbox_result)
+            if isinstance(segm_result, tuple):
+                segm_result = segm_result[0]  # ms rcnn
+        else:
+            bbox_result, segm_result = result, None 
+            bboxes = np.vstack(bbox_result)
+
+        labels = [np.full(res.shape[0], i, dtype=np.int32) for i, res in enumerate(result)]
+        r = [np.full(res.shape[2], i, dtype=np.int32) for i, res in enumerate(result)]
+
+        
+        result = [detection for detection in labels if detection[4] == chosen_class_id]
+
+
         frame = model.show_result(frame, result, score_thr=args.score_thr)
         if args.show:
             cv2.namedWindow('video', 0)

@@ -8,6 +8,7 @@ import torch
 from pathlib import Path
 import matplotlib.pyplot as plt
 from functools import reduce
+import numpy as np
 
 from ultralytics import SAM
 from ultralytics.models.sam import Predictor as SAMPredictor
@@ -73,6 +74,22 @@ def main():
     for frame in mmcv.track_iter_progress(video_reader):
         result = inference_detector(model, frame)
         # Filtrar apenas as detecções do objeto desejado (carro)
+
+        if isinstance(result, tuple):
+            bbox_result, segm_result = result
+            print(bbox_result)
+            if isinstance(segm_result, tuple):
+                segm_result = segm_result[0]  # ms rcnn
+        else:
+            bbox_result, segm_result = result, None 
+            bboxes = np.vstack(bbox_result)
+
+        labels = [np.full(res.shape[0], i, dtype=np.int32) for i, res in enumerate(result)]
+        #labels [ 0  0  0  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2 2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2 2  7  7  7 13 13 28 56 56]
+        r = [np.full(res.shape[2], i, dtype=np.int32) for i, res in enumerate(result)]
+
+        filtered_labels = [x for x in labels if x == chosen_class_id]
+        
         result = [detection for detection in result[0] if detection[4] == chosen_class_id]
 
          # Armazena as BBoxes dos resultados selecionados na lista
