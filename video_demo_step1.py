@@ -46,6 +46,9 @@ def main():
     #('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush')
     print(checkpoint['meta']['CLASSES'][chosen_class_id]) ## Classe carro
 
+    Classes_ = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+
+
     video_reader = mmcv.VideoReader(args.video)
     video_writer = None
     if args.out:
@@ -57,6 +60,7 @@ def main():
 
     for frame in mmcv.track_iter_progress(video_reader):
         result = inference_detector(model, frame)
+        image_copy = frame.copy()
         # Filtrar apenas as detecções do objeto desejado (carro)
         if isinstance(result, tuple):
             bbox_result, segm_result = result
@@ -67,22 +71,20 @@ def main():
             bbox_result, segm_result = result, None 
             bboxes = np.vstack(bbox_result)
 
-        labels = [np.full(res.shape[0], i, dtype=np.int32) for i, res in enumerate(result)]
-        r = [np.full(res.shape[2], i, dtype=np.int32) for i, res in enumerate(result)]
+        labels = [np.full(res.shape[0], i, dtype=np.int32) for i, res in enumerate(bbox_result)]
+        labels = np.concatenate(labels)
 
-        
-        result = [detection for detection in labels if detection[4] == chosen_class_id]
+        for labels_, box in zip(labels,bboxes):
+
+            if(labels_ == chosen_class_id):
+                x1, y1, x2, y2, z = map(int, box)
+                cv2.rectangle(image_copy, (x1, y1), (x2, y2), (0, 255, 0), 1)  # Desenha uma caixa verde
+                cv2.putText(image_copy, Classes_[labels_], (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)  # Adicione o nome da classe acima da caixa
 
 
-        frame = model.show_result(frame, result, score_thr=args.score_thr)
-        if args.show:
-            cv2.namedWindow('video', 0)
-            mmcv.imshow(frame, 'video', args.wait_time)
-        if args.out:
-            video_writer.write(frame)
-
-    if video_writer:
-        video_writer.release()
+    #cv2_imshow(image_copy)
+    cv2.imshow('Detecções Faster R-CNN', image_copy)
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
