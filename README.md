@@ -1,4 +1,4 @@
-# VOXAR_temp
+temp
 # Pode-se verificar as bibliotecas e os resultados no Google Colab do projeto VOXAR_lab_alt.ipynb.
 #  Video Demo Doc
 
